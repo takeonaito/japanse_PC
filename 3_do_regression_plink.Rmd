@@ -1,0 +1,42 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+# make AF 
+```{bash}
+plink2 \
+--bfile /mnt/share6/FOR_Takeo/Japanese_PC/tohokuonly_20160704_maf0001 \
+--freq \
+--out /mnt/share6/FOR_Takeo/Japanese_PC/result/frequency
+```
+
+
+## do logistic
+```{bash}
+plink2 \
+--bfile /mnt/share6/FOR_Takeo/Japanese_PC/tohokuonly_20160704_maf0001 \
+--pheno /mnt/share6/FOR_Takeo/Japanese_PC/pheno_file.txt \
+--pheno-name PC_80 \
+--logistic \
+--out /mnt/share6/FOR_Takeo/Japanese_PC/result/japanese_pc_binary \
+--maf 0.01 \
+--threads 10 \
+--pfilter 5e-2
+```
+
+
+## do linear regression
+```{bash}
+
+plink2 \
+--bfile /mnt/share6/FOR_Takeo/Japanese_PC/tohokuonly_20160704_maf0001 \
+--pheno /mnt/share6/FOR_Takeo/Japanese_PC/pheno_file.txt \
+--pheno-name NormalPC \
+--glm \
+--out /mnt/share6/FOR_Takeo/Japanese_PC/result/japanese_pc \
+--threads 10 \
+--maf 0.01 \
+--pfilter 5e-2
+```
+

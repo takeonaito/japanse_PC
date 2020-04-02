@@ -1,0 +1,63 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(readr)
+library(readxl)
+library(tidyverse)
+```
+
+
+```{r}
+
+pcdata <- read_xlsx('/mnt/share6/FOR_Takeo/Japanese_PC/pc_and_phenotype.xlsx') %>% 
+  dplyr::select(ID,specimen_ID,NormalPC)
+
+keyfile <-  fread('/mnt/share6/FOR_Takeo/Japanese_PC/japanese_key_file.txt')
+
+patients_id <- read_xlsx('/mnt/share6/FOR_Takeo/Japanese_PC/key_file_for_pc.xlsx')
+
+```
+
+```{r}
+pcdata1 <- pcdata %>% 
+  left_join(patients_id,by = "ID") %>% 
+  distinct(ID,.keep_all = T) %>% 
+  separate(hos_id,into= c("id1","id2","id3"),sep = "-") %>% 
+  mutate(id1 = str_pad(id1, 2, pad = "0")) %>% 
+  mutate(hos_id = paste0(id1,"-",id2,"-",id3)) %>% 
+  dplyr::select(-id1,-id2,-id3)
+```
+
+```{r}
+pcdata2 <- pcdata1 %>% 
+  left_join(keyfile,by = c("hos_id" = "oldID"))
+```
+
+```{r}
+pcdata2 <- pcdata2 %>% 
+  group_by(hos_id) %>% 
+  mutate(num = n()) %>% 
+  group_by(hos_id) %>% 
+  filter(!is.na(JPAID) & JPAID != "") %>% 
+  distinct(JPAID,.keep_all = T) %>% 
+  data.frame()
+```
+
+```{r}
+phenofile <- pcdata2 %>% 
+  dplyr::select(JPAID,NormalPC) %>% 
+  mutate(FID = JPAID, IID = JPAID) %>% 
+  dplyr::select(FID,IID,NormalPC) %>% 
+  mutate(PC_80 = ifelse(NormalPC >= 80,2,1))
+
+```
+
+```{r}
+phenofile %>% 
+  write_tsv('/mnt/share6/FOR_Takeo/Japanese_PC/pheno_file.txt')
+```
+

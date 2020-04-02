@@ -1,0 +1,59 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(readr)
+library(tidyverse)
+```
+
+
+# read bim file of japonica array
+```{r}
+
+bim <- fread('/mnt/share6/FOR_Takeo/Japanese_PC/tohokuonly_20160704_maf0001.bim')
+
+```
+
+
+# make columns for annovar 
+```{r}
+
+bim1 <- bim %>% 
+  mutate(Start = V4, nagasa = nchar(V5)-1) %>% 
+  mutate(End = Start + nagasa) %>% 
+  dplyr::select(V1,Start,End,V5,V6,V2)
+```
+
+# split bim1 into each chromosome
+```{r}
+
+for (i in 1:22){
+  outname = paste0('/mnt/share6/FOR_Takeo/Japanese_PC/annotation/chr',i,'bim.txt')
+  tmp_bim <- bim1 %>% 
+    filter(V1 == i)
+  
+  tmp_bim %>% 
+    write_tsv(outname,col_names = FALSE)
+}
+```
+
+
+# then run annovar 
+cd /mnt/share6/Annotation\ files/ichip_v2_v1_annovar_annotation_25_jul_2018
+
+for i in `seq 1 22`;
+do
+file_name="/mnt/share6/FOR_Takeo/Japanese_PC/annotation/chr"$i"bim.txt"
+out_name="/mnt/share6/FOR_Takeo/Japanese_PC/annotation/annotated_file/chr"$i
+
+annovar/table_annovar.pl ${file_name} humandb/ \
+-buildver hg19 \
+-out ${out_name} \
+-remove \
+-protocol refGene,knownGene,ensGene,dbnsfp33a,intervar_20180118,gnomad_exome,gnomad_genome,mcap,revel,avsnp150,cadd13gt20 \
+-operation g,g,g,f,f,f,f,f,f,f,f \
+-nastring . -polish --thread 20
+done
