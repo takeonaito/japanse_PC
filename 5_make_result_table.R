@@ -11,9 +11,11 @@ anotation <- fread('/mnt/share6/FOR_Takeo/Japanese_PC/annotation/annovar_anote_f
 
 ## merge 3 files
 myres1 <- myres %>% 
-  left_join(freq,by = "ID") %>% 
-  dplyr::select(-contains(".y")) %>% 
-  dplyr::rename(Chr = X.CHROM.x,Ref = REF.x, Alt = ALT.x)
+  left_join(freq,by = "ID")  %>% 
+  dplyr::select(-X.CHROM.y,-REF.y,-ALT.y) %>% 
+  dplyr::rename(Chr = X.CHROM.x,Ref = REF.x, Alt = ALT.x,
+                case_num_analysi = OBS_CT.x, num_for_freq = OBS_CT.y) %>% 
+  mutate(num_for_freq = num_for_freq/2)
 
 
 myres2 <- myres1 %>% 
@@ -54,10 +56,13 @@ colnames(myres) <- make.names(colnames(myres))
 
 
 ## merge 3 files
+## merge 3 files
 myres1 <- myres %>% 
-  left_join(freq,by = "ID") %>% 
-  dplyr::select(-contains(".y")) %>% 
-  dplyr::rename(Chr = X.CHROM.x,Ref = REF.x, Alt = ALT.x)
+  left_join(freq,by = "ID")  %>% 
+  dplyr::select(-X.CHROM.y,-REF.y,-ALT.y) %>% 
+  dplyr::rename(Chr = X.CHROM.x,Ref = REF.x, Alt = ALT.x,
+                case_num_analysi = OBS_CT.x, num_for_freq = OBS_CT.y) %>% 
+  mutate(num_for_freq = num_for_freq/2)
 
 myres2 <- myres1 %>% 
   left_join(anotation,by = c("Chr" = "Chr","POS" = "Start",
